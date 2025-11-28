@@ -62,6 +62,7 @@ class _HomePageState extends State<HomePage> {
                 callerAvatar: state.callerAvatar,
                 onAccept: () {
                   context.read<VideoCallBloc>().add(AcceptCall(state.callId));
+                  context.read<VideoCallBloc>().add(MonitorCallStatus(state.callId));
                   context.read<VideoCallBloc>().add(InitializeVideoCall(
                     channelName: state.channelName,
                     token: AgoraConfig.tempToken,

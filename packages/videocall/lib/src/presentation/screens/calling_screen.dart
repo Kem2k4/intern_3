@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../presentation/bloc/video_call_bloc.dart';
 import '../../presentation/bloc/video_call_state.dart';
+import '../../presentation/bloc/video_call_event.dart';
 import 'dart:async';
 
 class CallingScreen extends StatefulWidget {
@@ -37,6 +38,7 @@ class CallingScreen extends StatefulWidget {
 class _CallingScreenState extends State<CallingScreen> {
   int? _remoteUid;
   StreamSubscription? _remoteSub;
+  Timer? _timeoutTimer;
 
   @override
   void initState() {
@@ -45,13 +47,26 @@ class _CallingScreenState extends State<CallingScreen> {
     _remoteSub = bloc.videoCallService.agoraService.remoteUserStream.listen((participant) {
       setState(() {
         _remoteUid = int.tryParse(participant.userId);
+        _timeoutTimer?.cancel(); // Cancel timeout when remote user joins
       });
     });
+
+    if (widget.isRinging) {
+      _timeoutTimer = Timer(const Duration(seconds: 30), () {
+        if (mounted && _remoteUid == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No answer from receiver')),
+          );
+          context.read<VideoCallBloc>().add(LeaveVideoCall());
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _remoteSub?.cancel();
+    _timeoutTimer?.cancel();
     super.dispose();
   }
 
@@ -62,9 +77,29 @@ class _CallingScreenState extends State<CallingScreen> {
 
     String channel = 'video_call';
     final state = context.watch<VideoCallBloc>().state;
-    if (state is VideoCallJoined) channel = state.channelName;
+    
+    bool isMuted = widget.isMuted;
+    bool isCameraOff = widget.isCameraOff;
 
-    return Scaffold(
+    if (state is VideoCallJoined) {
+      channel = state.channelName;
+      isMuted = state.isMuted;
+      isCameraOff = !state.isVideoOn;
+    }
+
+    return BlocListener<VideoCallBloc, VideoCallState>(
+      listener: (context, state) {
+        if (state is VideoCallEnded) {
+          Navigator.of(context).pop();
+        }
+        if (state is VideoCallError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error)),
+          );
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
           children: [
@@ -109,7 +144,7 @@ class _CallingScreenState extends State<CallingScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (widget.isRinging)
+                      if (widget.isRinging && _remoteUid == null)
                         const Text(
                           'Ringing...',
                           style: TextStyle(color: Colors.white70, fontSize: 14),
@@ -129,12 +164,12 @@ class _CallingScreenState extends State<CallingScreen> {
                   ElevatedButton(
                     onPressed: widget.onToggleMute,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: widget.isMuted ? Colors.red : Colors.white24,
+                      backgroundColor: isMuted ? Colors.red : Colors.white24,
                       shape: const CircleBorder(),
                       padding: const EdgeInsets.all(15),
                     ),
                     child: Icon(
-                      widget.isMuted ? Icons.mic_off : Icons.mic,
+                      isMuted ? Icons.mic_off : Icons.mic,
                       color: Colors.white,
                       size: 25,
                     ),
@@ -160,12 +195,12 @@ class _CallingScreenState extends State<CallingScreen> {
                   ElevatedButton(
                     onPressed: widget.onToggleCamera,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: widget.isCameraOff ? Colors.red : Colors.white24,
+                      backgroundColor: isCameraOff ? Colors.red : Colors.white24,
                       shape: const CircleBorder(),
                       padding: const EdgeInsets.all(15),
                     ),
                     child: Icon(
-                      widget.isCameraOff ? Icons.videocam_off : Icons.videocam,
+                      isCameraOff ? Icons.videocam_off : Icons.videocam,
                       color: Colors.white,
                       size: 25,
                     ),
@@ -189,6 +224,7 @@ class _CallingScreenState extends State<CallingScreen> {
             ),
           ],
         ),
-      );
+      ),
+    );
   }
 }

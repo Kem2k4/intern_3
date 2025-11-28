@@ -50,6 +50,15 @@ class RejectCall extends VideoCallEvent {
   List<Object?> get props => [callId];
 }
 
+class MonitorCallStatus extends VideoCallEvent {
+  final String callId;
+
+  const MonitorCallStatus(this.callId);
+
+  @override
+  List<Object?> get props => [callId];
+}
+
 class IncomingCallReceived extends VideoCallEvent {
   final String callId;
   final String callerId;

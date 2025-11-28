@@ -17,8 +17,8 @@ class VideoCallService {
     final hasPermissions = await PermissionService.hasAllRequiredPermissions();
     if (!hasPermissions) {
       await PermissionService.requestVideoCallPermissions();
-      // TODO: Check if permissions were granted
-      return true; // Temporarily return true
+      // Re-check permissions after request
+      return await PermissionService.hasAllRequiredPermissions();
     }
     return true;
   }

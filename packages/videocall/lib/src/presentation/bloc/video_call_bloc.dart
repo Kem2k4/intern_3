@@ -17,6 +17,7 @@ class VideoCallBloc extends Bloc<VideoCallEvent, VideoCallState> {
   String? _channelName;
   String? _token;
   int? _uid;
+  String? _currentCallId;
 
   // Static reference to current bloc instance for FCM callbacks
   static VideoCallBloc? _currentInstance;
@@ -34,6 +35,7 @@ class VideoCallBloc extends Bloc<VideoCallEvent, VideoCallState> {
     on<AcceptCall>(_onAcceptCall);
     on<RejectCall>(_onRejectCall);
     on<IncomingCallReceived>(_onIncomingCallReceived);
+    on<MonitorCallStatus>(_onMonitorCallStatus);
 
     // Listen to media state changes (including token expiration)
     _mediaStateSubscription = videoCallService.agoraService.mediaStateStream.listen(_handleMediaStateChange);
@@ -96,9 +98,14 @@ class VideoCallBloc extends Bloc<VideoCallEvent, VideoCallState> {
     LeaveVideoCall event,
     Emitter<VideoCallState> emit,
   ) async {
-    if (state is VideoCallJoined) {
+    if (state is VideoCallJoined || state is VideoCallLoading) {
       try {
-        await videoCallService.leaveCall();
+        if (_currentCallId != null) {
+          await videoCallService.endCall(_currentCallId!);
+          _currentCallId = null;
+        } else {
+          await videoCallService.leaveCall();
+        }
         emit(VideoCallEnded());
       } catch (e) {
         emit(VideoCallError(e.toString()));
@@ -194,6 +201,21 @@ class VideoCallBloc extends Bloc<VideoCallEvent, VideoCallState> {
     Emitter<VideoCallState> emit,
   ) async {
     emit(VideoCallError(event.error));
+  }
+
+  Future<void> _onMonitorCallStatus(
+    MonitorCallStatus event,
+    Emitter<VideoCallState> emit,
+  ) async {
+    _currentCallId = event.callId;
+    await _callSubscription?.cancel();
+    _callSubscription = videoCallService.repository.watchCall(event.callId).listen((call) {
+      if (call == null) return;
+      
+      if (call.status == 'ended' || call.status == 'rejected') {
+        add(LeaveVideoCall());
+      }
+    });
   }
 
   /// Handle media state changes from Agora service

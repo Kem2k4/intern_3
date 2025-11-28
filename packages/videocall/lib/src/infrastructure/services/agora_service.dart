@@ -207,12 +207,17 @@ class AgoraServiceImpl implements AgoraService {
     if (_engine == null) return;
 
     try {
+      // Use muteLocalVideoStream instead of disableVideo to keep remote video active
+      await _engine!.muteLocalVideoStream(!enabled);
+      
+      // Also control the local preview
       if (enabled) {
-        await _engine!.enableVideo();
+        await _engine!.enableLocalVideo(true);
         await _engine!.startPreview();
       } else {
-        await _engine!.disableVideo();
-        await _engine!.stopPreview();
+        await _engine!.enableLocalVideo(false);
+        // Don't stop preview if we want to show something else, but for now let's keep it consistent
+        // await _engine!.stopPreview(); 
       }
       
       _mediaStateController.add({

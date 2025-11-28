@@ -1,11 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:videocall/videocall.dart';
-import 'package:auth/auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 
 class VideoCallInitiatorScreen extends StatefulWidget {
@@ -33,58 +30,43 @@ class VideoCallInitiatorScreen extends StatefulWidget {
 }
 
 class _VideoCallInitiatorScreenState extends State<VideoCallInitiatorScreen> {
-  late VideoCallBloc _videoCallBloc;
-  late VideoCallService _videoCallService;
-  Timer? _callTimeoutTimer;
 
   @override
   void initState() {
     super.initState();
 
-  // Initialize services (RTDB path aligned to /calls by data source)
-  final database = FirebaseDatabase.instance;
-  final dataSource = VideoCallFirebaseDataSource(database);
-  final repository = VideoCallRepositoryImpl(dataSource);
-  final agoraService = AgoraServiceImpl();
-  final authRepository = FirebaseAuthRepository();
-  _videoCallService = VideoCallService(repository, agoraService, authRepository);
-
-    // Initialize BLoC
-    _videoCallBloc = VideoCallBloc(_videoCallService);
-
     // Navigate to CallingScreen immediately and start the call process
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        final videoCallBloc = context.read<VideoCallBloc>();
+        
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => BlocProvider.value(
-              value: _videoCallBloc,
-              child: CallingScreen(
-                callerName: widget.receiverName,
-                callerAvatar: widget.receiverAvatar,
-                isMuted: false,
-                isCameraOff: false,
-                isFrontCamera: true,
-                isRinging: true, // Start in ringing state
-                onToggleMute: () => _videoCallBloc.add(ToggleMute()),
-                onToggleCamera: () => _videoCallBloc.add(ToggleVideo()),
-                onSwitchCamera: () => _videoCallBloc.add(SwitchCamera()),
-                onHangUp: () {
-                  if (!_videoCallBloc.isClosed) {
-                    _videoCallBloc.add(LeaveVideoCall());
-                  }
-                },
-              ),
+            builder: (_) => CallingScreen(
+              callerName: widget.receiverName,
+              callerAvatar: widget.receiverAvatar,
+              isMuted: false,
+              isCameraOff: false,
+              isFrontCamera: true,
+              isRinging: true, // Start in ringing state
+              onToggleMute: () => videoCallBloc.add(ToggleMute()),
+              onToggleCamera: () => videoCallBloc.add(ToggleVideo()),
+              onSwitchCamera: () => videoCallBloc.add(SwitchCamera()),
+              onHangUp: () {
+                if (!videoCallBloc.isClosed) {
+                  videoCallBloc.add(LeaveVideoCall());
+                }
+              },
             ),
           ),
         );
-        _initiateCall();
+        _initiateCall(videoCallBloc);
       }
     });
   }
 
-  Future<void> _initiateCall() async {
+  Future<void> _initiateCall(VideoCallBloc videoCallBloc) async {
     try {
       // Check if Agora is properly configured
       if (!AgoraConfig.isConfigured) {
@@ -98,14 +80,14 @@ class _VideoCallInitiatorScreenState extends State<VideoCallInitiatorScreen> {
         return;
       }
 
-      final hasPermissions = await _videoCallService.checkAndRequestPermissions();
+      final hasPermissions = await videoCallBloc.videoCallService.checkAndRequestPermissions();
       if (!hasPermissions) {
         _showErrorAndPop('Camera and microphone permissions are required.');
         return;
       }
 
       // Initiate call (create DB record and trigger FCM)
-      final callId = await _videoCallService.initiateCall(
+      final callId = await videoCallBloc.videoCallService.initiateCall(
         callerId: widget.currentUserId,
         callerName: widget.currentUserName,
         callerAvatar: widget.currentUserAvatar,
@@ -115,23 +97,18 @@ class _VideoCallInitiatorScreenState extends State<VideoCallInitiatorScreen> {
       );
       debugPrint('Call initiated with ID: $callId');
 
-      // Set up call timeout (30 seconds)
-      _callTimeoutTimer = Timer(const Duration(seconds: 30), () {
-        if (mounted && !_videoCallBloc.isClosed) {
-          _videoCallBloc.add(LeaveVideoCall());
-          _showErrorAndPop('Call timeout - no answer');
-        }
-      });
+      // Monitor call status
+      videoCallBloc.add(MonitorCallStatus(callId));
 
       // Initialize video call
-      _videoCallBloc.add(InitializeVideoCall(
+      videoCallBloc.add(InitializeVideoCall(
         channelName: AgoraConfig.testChannelName,
         token: AgoraConfig.tempToken,
         uid: widget.currentUserId,
       ));
 
       // Join the call
-      _videoCallBloc.add(JoinVideoCall());
+      videoCallBloc.add(JoinVideoCall());
     } catch (e) {
       debugPrint('Error initiating call: $e');
       _showErrorAndPop('Failed to start call: $e');
@@ -147,8 +124,6 @@ class _VideoCallInitiatorScreenState extends State<VideoCallInitiatorScreen> {
 
   @override
   void dispose() {
-    _callTimeoutTimer?.cancel();
-    _videoCallBloc.close();
     super.dispose();
   }
 
