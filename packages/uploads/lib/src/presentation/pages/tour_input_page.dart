@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '../../services/pdf_service.dart';
 import 'media_view_page.dart';
 
 class TourInputPage extends StatefulWidget {
@@ -152,6 +153,34 @@ class _TourInputPageState extends State<TourInputPage> {
       tourData['id'] = newTourRef.key;
       
       await newTourRef.set(tourData);
+
+      // Generate and upload PDF
+      try {
+        final bucketName = FirebaseStorage.instance.app.options.storageBucket;
+        final tourId = newTourRef.key;
+        final pdfPath = 'tour_pdfs/$tourId.pdf';
+        final encodedPath = Uri.encodeComponent(pdfPath);
+        final publicUrl = 'https://firebasestorage.googleapis.com/v0/b/$bucketName/o/$encodedPath?alt=media';
+
+        final pdfService = PdfService();
+        final pdfBytes = await pdfService.generateTourPdf(tourData, publicUrl);
+
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child(pdfPath);
+
+        final uploadTask = storageRef.putData(
+          pdfBytes,
+          SettableMetadata(contentType: 'application/pdf'),
+        );
+
+        final snapshot = await uploadTask;
+        final pdfUrl = await snapshot.ref.getDownloadURL();
+
+        await newTourRef.update({'pdfUrl': pdfUrl});
+      } catch (e) {
+        debugPrint('Error generating/uploading PDF: $e');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

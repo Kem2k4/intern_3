@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'pdf_preview_page.dart';
 
 class TourListPage extends StatefulWidget {
   const TourListPage({super.key});
@@ -48,6 +49,48 @@ class _TourListPageState extends State<TourListPage> {
     }
   }
 
+  Future<void> _deleteTour(String tourId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: const Text('Bạn có chắc chắn muốn xóa tour này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await _databaseRef.child(tourId).remove();
+        setState(() {
+          _tours.removeWhere((tour) => tour['id'] == tourId);
+          _selectedTourIds.remove(tourId);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Đã xóa tour thành công')),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error deleting tour: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi khi xóa tour: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -59,42 +102,6 @@ class _TourListPageState extends State<TourListPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Danh sách Tour'),
-        backgroundColor: Colors.blue,
-        actions: [
-          if (_selectedTourIds.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              tooltip: 'Bỏ chọn tất cả',
-              onPressed: () {
-                setState(() {
-                  _selectedTourIds.clear();
-                });
-              },
-            ),
-          IconButton(
-            icon: Icon(_selectedTourIds.length == _tours.length && _tours.isNotEmpty
-                ? Icons.check_box
-                : Icons.check_box_outline_blank),
-            tooltip: _selectedTourIds.length == _tours.length && _tours.isNotEmpty
-                ? 'Bỏ chọn tất cả'
-                : 'Chọn tất cả',
-            onPressed: () {
-              setState(() {
-                if (_selectedTourIds.length == _tours.length) {
-                  _selectedTourIds.clear();
-                } else {
-                  _selectedTourIds = _tours
-                      .map((tour) => tour['id']?.toString() ?? '')
-                      .where((id) => id.isNotEmpty)
-                      .toSet();
-                }
-              });
-            },
-          ),
-        ],
-      ),
       body: _tours.isEmpty
           ? const Center(
               child: Text(
@@ -102,27 +109,106 @@ class _TourListPageState extends State<TourListPage> {
                 style: TextStyle(fontSize: 18),
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _tours.length,
-              itemBuilder: (context, index) {
-                final tour = _tours[index];
-                return _buildTourCard(tour);
-              },
+          : Column(
+              children: [
+                Container(
+                  color: Colors.blue,
+                  child: Column(
+                    children: [
+                      if (_tours.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (_selectedTourIds.isNotEmpty)
+                              TextButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedTourIds.clear();
+                                  });
+                                },
+                                icon: const Icon(Icons.clear, color: Colors.white),
+                                label: const Text(
+                                  'Bỏ chọn tất cả',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  if (_selectedTourIds.length == _tours.length) {
+                                    _selectedTourIds.clear();
+                                  } else {
+                                    _selectedTourIds = _tours
+                                        .map((tour) => tour['id']?.toString() ?? '')
+                                        .where((id) => id.isNotEmpty)
+                                        .toSet();
+                                  }
+                                });
+                              },
+                              icon: Icon(
+                                _selectedTourIds.length == _tours.length
+                                    ? Icons.check_box
+                                    : Icons.check_box_outline_blank,
+                                color: Colors.white,
+                              ),
+                              label: Text(
+                                _selectedTourIds.length == _tours.length
+                                    ? 'Bỏ chọn tất cả'
+                                    : 'Chọn tất cả',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: _tours.length,
+                    itemBuilder: (context, index) {
+                      final tour = _tours[index];
+                      return _buildTourCard(tour);
+                    },
+                  ),
+                ),
+              ],
             ),
       floatingActionButton: _selectedTourIds.isNotEmpty
           ? FloatingActionButton.extended(
               onPressed: () {
-                // TODO: Implement action for selected tours (e.g., print QR codes)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Đã chọn ${_selectedTourIds.length} tour'),
-                    duration: const Duration(seconds: 2),
+                final selectedTours = _tours.where((tour) => _selectedTourIds.contains(tour['id'])).toList();
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    insetPadding: const EdgeInsets.all(20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 40.0, left: 8.0, right: 8.0, bottom: 8.0),
+                          child: PdfPreviewPage(selectedTours: selectedTours),
+                        ),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
-              label: Text('${_selectedTourIds.length} đã chọn'),
-              icon: const Icon(Icons.qr_code),
+              label: Text('Xuất PDF (${_selectedTourIds.length})'),
+              icon: const Icon(Icons.picture_as_pdf),
               backgroundColor: Colors.blue,
             )
           : null,
@@ -194,6 +280,14 @@ class _TourListPageState extends State<TourListPage> {
                   }
                 });
               },
+            ),
+          ),
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _deleteTour(tourId),
             ),
           ),
         ],
