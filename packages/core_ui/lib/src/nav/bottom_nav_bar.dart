@@ -6,7 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:livestream/livestream.dart';
 import 'package:chat/chat.dart';
 import 'package:map_tiler/map_tiler.dart';
+import 'package:uploads/uploads.dart' as uploads;
+import 'package:print_qr/print_qr.dart' as print_qr;
 
+// Main navigation bar
 /// A stateful widget for the main bottom navigation bar.
 class MainBottomNavBar extends StatefulWidget {
   final int selectedIndex;
@@ -32,10 +35,10 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
       },
       child: const MessageListPage(),
     ),
-    const Center(child: Text('Index 1: In')),
+    uploads.TourInputPage(),
     const MapPage(), // Maps tab - using map_tiler package
     const LivestreamMainPage(), // Live tab
-    const Center(child: Text('Index 4: Uploads')),
+    print_qr.TourListPage(), // In tab - tour list
   ];
 
   void _onItemTapped(int index) {
@@ -49,10 +52,10 @@ class _MainBottomNavBarState extends State<MainBottomNavBar> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chats'),
-          BottomNavigationBarItem(icon: Icon(Icons.inbox_outlined), label: 'In'),
+          BottomNavigationBarItem(icon: Icon(Icons.upload_outlined), label: 'Uploads'),
           BottomNavigationBarItem(icon: Icon(Icons.map_outlined), label: 'Maps'),
           BottomNavigationBarItem(icon: Icon(Icons.live_tv_outlined), label: 'Live'),
-          BottomNavigationBarItem(icon: Icon(Icons.upload_outlined), label: 'Uploads'),
+          BottomNavigationBarItem(icon: Icon(Icons.inbox_outlined), label: 'In'),
         ],
         currentIndex: widget.selectedIndex,
         selectedItemColor: Colors.amber[800],

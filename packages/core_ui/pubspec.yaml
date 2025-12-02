@@ -34,6 +34,10 @@ dependencies:
     path: ../livestream
   map_tiler:
     path: ../map_tiler
+  uploads:
+    path: ../uploads
+  print_qr:
+    path: ../print_qr
 
 dev_dependencies:
   flutter_test:
