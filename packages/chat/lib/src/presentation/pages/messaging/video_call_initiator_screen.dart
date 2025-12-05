@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:videocall/main.dart';
 import 'package:videocall/videocall.dart';
 
 
@@ -82,7 +83,8 @@ class _VideoCallInitiatorScreenState extends State<VideoCallInitiatorScreen> {
 
       final hasPermissions = await videoCallBloc.videoCallService.checkAndRequestPermissions();
       if (!hasPermissions) {
-        _showErrorAndPop('Camera and microphone permissions are required.');
+        _showErrorAndPop('Camera and microphone permissions are required!');
+        //await PermissionService.requestVideoCallPermissions();
         return;
       }
 

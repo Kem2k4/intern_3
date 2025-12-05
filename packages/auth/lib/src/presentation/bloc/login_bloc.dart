@@ -1,8 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import 'package:auth/auth.dart';
-
 /// States for the login process
 abstract class LoginState {
   const LoginState();

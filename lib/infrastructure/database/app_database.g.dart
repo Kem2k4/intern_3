@@ -12,52 +12,88 @@ class $UserLoginsTable extends UserLogins
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
-      'email', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _userNameMeta =
-      const VerificationMeta('userName');
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userNameMeta = const VerificationMeta(
+    'userName',
+  );
   @override
   late final GeneratedColumn<String> userName = GeneratedColumn<String>(
-      'user_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _fullNameMeta =
-      const VerificationMeta('fullName');
+    'user_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fullNameMeta = const VerificationMeta(
+    'fullName',
+  );
   @override
   late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
-      'full_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _isLoggedInMeta =
-      const VerificationMeta('isLoggedIn');
+    'full_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isLoggedInMeta = const VerificationMeta(
+    'isLoggedIn',
+  );
   @override
   late final GeneratedColumn<bool> isLoggedIn = GeneratedColumn<bool>(
-      'is_logged_in', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("is_logged_in" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _lastLoginMeta =
-      const VerificationMeta('lastLogin');
+    'is_logged_in',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_logged_in" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastLoginMeta = const VerificationMeta(
+    'lastLogin',
+  );
   @override
   late final GeneratedColumn<DateTime> lastLogin = GeneratedColumn<DateTime>(
-      'last_login', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+    'last_login',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, email, userName, fullName, isLoggedIn, lastLogin];
+  List<GeneratedColumn> get $columns => [
+    id,
+    email,
+    userName,
+    fullName,
+    isLoggedIn,
+    lastLogin,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'user_logins';
   @override
-  VerificationContext validateIntegrity(Insertable<UserLogin> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<UserLogin> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -67,31 +103,42 @@ class $UserLoginsTable extends UserLogins
     }
     if (data.containsKey('email')) {
       context.handle(
-          _emailMeta, email.isAcceptableOrUnknown(data['email']!, _emailMeta));
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
     } else if (isInserting) {
       context.missing(_emailMeta);
     }
     if (data.containsKey('user_name')) {
-      context.handle(_userNameMeta,
-          userName.isAcceptableOrUnknown(data['user_name']!, _userNameMeta));
+      context.handle(
+        _userNameMeta,
+        userName.isAcceptableOrUnknown(data['user_name']!, _userNameMeta),
+      );
     } else if (isInserting) {
       context.missing(_userNameMeta);
     }
     if (data.containsKey('full_name')) {
-      context.handle(_fullNameMeta,
-          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+      context.handle(
+        _fullNameMeta,
+        fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta),
+      );
     } else if (isInserting) {
       context.missing(_fullNameMeta);
     }
     if (data.containsKey('is_logged_in')) {
       context.handle(
+        _isLoggedInMeta,
+        isLoggedIn.isAcceptableOrUnknown(
+          data['is_logged_in']!,
           _isLoggedInMeta,
-          isLoggedIn.isAcceptableOrUnknown(
-              data['is_logged_in']!, _isLoggedInMeta));
+        ),
+      );
     }
     if (data.containsKey('last_login')) {
-      context.handle(_lastLoginMeta,
-          lastLogin.isAcceptableOrUnknown(data['last_login']!, _lastLoginMeta));
+      context.handle(
+        _lastLoginMeta,
+        lastLogin.isAcceptableOrUnknown(data['last_login']!, _lastLoginMeta),
+      );
     }
     return context;
   }
@@ -102,18 +149,30 @@ class $UserLoginsTable extends UserLogins
   UserLogin map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UserLogin(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      email: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}email'])!,
-      userName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_name'])!,
-      fullName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}full_name'])!,
-      isLoggedIn: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}is_logged_in'])!,
-      lastLogin: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_login']),
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      userName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_name'],
+      )!,
+      fullName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_name'],
+      )!,
+      isLoggedIn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_logged_in'],
+      )!,
+      lastLogin: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_login'],
+      ),
     );
   }
 
@@ -130,13 +189,14 @@ class UserLogin extends DataClass implements Insertable<UserLogin> {
   final String fullName;
   final bool isLoggedIn;
   final DateTime? lastLogin;
-  const UserLogin(
-      {required this.id,
-      required this.email,
-      required this.userName,
-      required this.fullName,
-      required this.isLoggedIn,
-      this.lastLogin});
+  const UserLogin({
+    required this.id,
+    required this.email,
+    required this.userName,
+    required this.fullName,
+    required this.isLoggedIn,
+    this.lastLogin,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -164,8 +224,10 @@ class UserLogin extends DataClass implements Insertable<UserLogin> {
     );
   }
 
-  factory UserLogin.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory UserLogin.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserLogin(
       id: serializer.fromJson<String>(json['id']),
@@ -189,29 +251,30 @@ class UserLogin extends DataClass implements Insertable<UserLogin> {
     };
   }
 
-  UserLogin copyWith(
-          {String? id,
-          String? email,
-          String? userName,
-          String? fullName,
-          bool? isLoggedIn,
-          Value<DateTime?> lastLogin = const Value.absent()}) =>
-      UserLogin(
-        id: id ?? this.id,
-        email: email ?? this.email,
-        userName: userName ?? this.userName,
-        fullName: fullName ?? this.fullName,
-        isLoggedIn: isLoggedIn ?? this.isLoggedIn,
-        lastLogin: lastLogin.present ? lastLogin.value : this.lastLogin,
-      );
+  UserLogin copyWith({
+    String? id,
+    String? email,
+    String? userName,
+    String? fullName,
+    bool? isLoggedIn,
+    Value<DateTime?> lastLogin = const Value.absent(),
+  }) => UserLogin(
+    id: id ?? this.id,
+    email: email ?? this.email,
+    userName: userName ?? this.userName,
+    fullName: fullName ?? this.fullName,
+    isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+    lastLogin: lastLogin.present ? lastLogin.value : this.lastLogin,
+  );
   UserLogin copyWithCompanion(UserLoginsCompanion data) {
     return UserLogin(
       id: data.id.present ? data.id.value : this.id,
       email: data.email.present ? data.email.value : this.email,
       userName: data.userName.present ? data.userName.value : this.userName,
       fullName: data.fullName.present ? data.fullName.value : this.fullName,
-      isLoggedIn:
-          data.isLoggedIn.present ? data.isLoggedIn.value : this.isLoggedIn,
+      isLoggedIn: data.isLoggedIn.present
+          ? data.isLoggedIn.value
+          : this.isLoggedIn,
       lastLogin: data.lastLogin.present ? data.lastLogin.value : this.lastLogin,
     );
   }
@@ -269,10 +332,10 @@ class UserLoginsCompanion extends UpdateCompanion<UserLogin> {
     this.isLoggedIn = const Value.absent(),
     this.lastLogin = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        email = Value(email),
-        userName = Value(userName),
-        fullName = Value(fullName);
+  }) : id = Value(id),
+       email = Value(email),
+       userName = Value(userName),
+       fullName = Value(fullName);
   static Insertable<UserLogin> custom({
     Expression<String>? id,
     Expression<String>? email,
@@ -293,14 +356,15 @@ class UserLoginsCompanion extends UpdateCompanion<UserLogin> {
     });
   }
 
-  UserLoginsCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? email,
-      Value<String>? userName,
-      Value<String>? fullName,
-      Value<bool>? isLoggedIn,
-      Value<DateTime?>? lastLogin,
-      Value<int>? rowid}) {
+  UserLoginsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? email,
+    Value<String>? userName,
+    Value<String>? fullName,
+    Value<bool>? isLoggedIn,
+    Value<DateTime?>? lastLogin,
+    Value<int>? rowid,
+  }) {
     return UserLoginsCompanion(
       id: id ?? this.id,
       email: email ?? this.email,
@@ -365,147 +429,224 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [userLogins];
 }
 
-typedef $$UserLoginsTableCreateCompanionBuilder = UserLoginsCompanion Function({
-  required String id,
-  required String email,
-  required String userName,
-  required String fullName,
-  Value<bool> isLoggedIn,
-  Value<DateTime?> lastLogin,
-  Value<int> rowid,
-});
-typedef $$UserLoginsTableUpdateCompanionBuilder = UserLoginsCompanion Function({
-  Value<String> id,
-  Value<String> email,
-  Value<String> userName,
-  Value<String> fullName,
-  Value<bool> isLoggedIn,
-  Value<DateTime?> lastLogin,
-  Value<int> rowid,
-});
-
-class $$UserLoginsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $UserLoginsTable,
-    UserLogin,
-    $$UserLoginsTableFilterComposer,
-    $$UserLoginsTableOrderingComposer,
-    $$UserLoginsTableCreateCompanionBuilder,
-    $$UserLoginsTableUpdateCompanionBuilder> {
-  $$UserLoginsTableTableManager(_$AppDatabase db, $UserLoginsTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          filteringComposer:
-              $$UserLoginsTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$UserLoginsTableOrderingComposer(ComposerState(db, table)),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<String> email = const Value.absent(),
-            Value<String> userName = const Value.absent(),
-            Value<String> fullName = const Value.absent(),
-            Value<bool> isLoggedIn = const Value.absent(),
-            Value<DateTime?> lastLogin = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              UserLoginsCompanion(
-            id: id,
-            email: email,
-            userName: userName,
-            fullName: fullName,
-            isLoggedIn: isLoggedIn,
-            lastLogin: lastLogin,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String id,
-            required String email,
-            required String userName,
-            required String fullName,
-            Value<bool> isLoggedIn = const Value.absent(),
-            Value<DateTime?> lastLogin = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              UserLoginsCompanion.insert(
-            id: id,
-            email: email,
-            userName: userName,
-            fullName: fullName,
-            isLoggedIn: isLoggedIn,
-            lastLogin: lastLogin,
-            rowid: rowid,
-          ),
-        ));
-}
+typedef $$UserLoginsTableCreateCompanionBuilder =
+    UserLoginsCompanion Function({
+      required String id,
+      required String email,
+      required String userName,
+      required String fullName,
+      Value<bool> isLoggedIn,
+      Value<DateTime?> lastLogin,
+      Value<int> rowid,
+    });
+typedef $$UserLoginsTableUpdateCompanionBuilder =
+    UserLoginsCompanion Function({
+      Value<String> id,
+      Value<String> email,
+      Value<String> userName,
+      Value<String> fullName,
+      Value<bool> isLoggedIn,
+      Value<DateTime?> lastLogin,
+      Value<int> rowid,
+    });
 
 class $$UserLoginsTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $UserLoginsTable> {
-  $$UserLoginsTableFilterComposer(super.$state);
-  ColumnFilters<String> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+    extends Composer<_$AppDatabase, $UserLoginsTable> {
+  $$UserLoginsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get email => $state.composableBuilder(
-      column: $state.table.email,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get userName => $state.composableBuilder(
-      column: $state.table.userName,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+  ColumnFilters<String> get userName => $composableBuilder(
+    column: $table.userName,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get fullName => $state.composableBuilder(
-      column: $state.table.fullName,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+  ColumnFilters<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<bool> get isLoggedIn => $state.composableBuilder(
-      column: $state.table.isLoggedIn,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+  ColumnFilters<bool> get isLoggedIn => $composableBuilder(
+    column: $table.isLoggedIn,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get lastLogin => $state.composableBuilder(
-      column: $state.table.lastLogin,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+  ColumnFilters<DateTime> get lastLogin => $composableBuilder(
+    column: $table.lastLogin,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$UserLoginsTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $UserLoginsTable> {
-  $$UserLoginsTableOrderingComposer(super.$state);
-  ColumnOrderings<String> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+    extends Composer<_$AppDatabase, $UserLoginsTable> {
+  $$UserLoginsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get email => $state.composableBuilder(
-      column: $state.table.email,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get userName => $state.composableBuilder(
-      column: $state.table.userName,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+  ColumnOrderings<String> get userName => $composableBuilder(
+    column: $table.userName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get fullName => $state.composableBuilder(
-      column: $state.table.fullName,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+  ColumnOrderings<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<bool> get isLoggedIn => $state.composableBuilder(
-      column: $state.table.isLoggedIn,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+  ColumnOrderings<bool> get isLoggedIn => $composableBuilder(
+    column: $table.isLoggedIn,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get lastLogin => $state.composableBuilder(
-      column: $state.table.lastLogin,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+  ColumnOrderings<DateTime> get lastLogin => $composableBuilder(
+    column: $table.lastLogin,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
+
+class $$UserLoginsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserLoginsTable> {
+  $$UserLoginsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get userName =>
+      $composableBuilder(column: $table.userName, builder: (column) => column);
+
+  GeneratedColumn<String> get fullName =>
+      $composableBuilder(column: $table.fullName, builder: (column) => column);
+
+  GeneratedColumn<bool> get isLoggedIn => $composableBuilder(
+    column: $table.isLoggedIn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastLogin =>
+      $composableBuilder(column: $table.lastLogin, builder: (column) => column);
+}
+
+class $$UserLoginsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserLoginsTable,
+          UserLogin,
+          $$UserLoginsTableFilterComposer,
+          $$UserLoginsTableOrderingComposer,
+          $$UserLoginsTableAnnotationComposer,
+          $$UserLoginsTableCreateCompanionBuilder,
+          $$UserLoginsTableUpdateCompanionBuilder,
+          (
+            UserLogin,
+            BaseReferences<_$AppDatabase, $UserLoginsTable, UserLogin>,
+          ),
+          UserLogin,
+          PrefetchHooks Function()
+        > {
+  $$UserLoginsTableTableManager(_$AppDatabase db, $UserLoginsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserLoginsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserLoginsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserLoginsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> userName = const Value.absent(),
+                Value<String> fullName = const Value.absent(),
+                Value<bool> isLoggedIn = const Value.absent(),
+                Value<DateTime?> lastLogin = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UserLoginsCompanion(
+                id: id,
+                email: email,
+                userName: userName,
+                fullName: fullName,
+                isLoggedIn: isLoggedIn,
+                lastLogin: lastLogin,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String email,
+                required String userName,
+                required String fullName,
+                Value<bool> isLoggedIn = const Value.absent(),
+                Value<DateTime?> lastLogin = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UserLoginsCompanion.insert(
+                id: id,
+                email: email,
+                userName: userName,
+                fullName: fullName,
+                isLoggedIn: isLoggedIn,
+                lastLogin: lastLogin,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UserLoginsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserLoginsTable,
+      UserLogin,
+      $$UserLoginsTableFilterComposer,
+      $$UserLoginsTableOrderingComposer,
+      $$UserLoginsTableAnnotationComposer,
+      $$UserLoginsTableCreateCompanionBuilder,
+      $$UserLoginsTableUpdateCompanionBuilder,
+      (UserLogin, BaseReferences<_$AppDatabase, $UserLoginsTable, UserLogin>),
+      UserLogin,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
